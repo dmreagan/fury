@@ -26,77 +26,78 @@ from fury import window
 from dipy.utils.optpkg import optional_package
 vtk, have_vtk, setup_module = optional_package('vtk')
 
-###############################################################################
-# Create an empty ``vtkPolyData``
-
-my_polydata = vtk.vtkPolyData()
-
-###############################################################################
-# Create a cube with vertices and triangles as numpy arrays
-
-my_vertices = np.array([[0.0,  0.0,  0.0],
-                       [0.0,  0.0,  1.0],
-                       [0.0,  1.0,  0.0],
-                       [0.0,  1.0,  1.0],
-                       [1.0,  0.0,  0.0],
-                       [1.0,  0.0,  1.0],
-                       [1.0,  1.0,  0.0],
-                       [1.0,  1.0,  1.0]])
-# the data type for vtk is needed to mention here, numpy.int64
-my_triangles = np.array([[0,  6,  4],
-                         [0,  2,  6],
-                         [0,  3,  2],
-                         [0,  1,  3],
-                         [2,  7,  6],
-                         [2,  3,  7],
-                         [4,  6,  7],
-                         [4,  7,  5],
-                         [0,  4,  5],
-                         [0,  5,  1],
-                         [1,  5,  7],
-                         [1,  7,  3]], dtype='i8')
 
 
-###############################################################################
-# Set vertices and triangles in the ``vtkPolyData``
 
-ut_vtk.set_polydata_vertices(my_polydata, my_vertices)
-ut_vtk.set_polydata_triangles(my_polydata, my_triangles)
 
-###############################################################################
-# Save the ``vtkPolyData``
 
-file_name = "my_cube.vtk"
-io_vtk.save_polydata(my_polydata, file_name)
-print("Surface saved in " + file_name)
+reader = vtk.vtkPolyDataReader()
+reader.SetFileName('C:/Users/dmreagan/Downloads/100307_white_rh.vtk')
 
-###############################################################################
-# Load the ``vtkPolyData``
 
-cube_polydata = io_vtk.load_polydata(file_name)
+subdivider = vtk.vtkLoopSubdivisionFilter()
+subdivider.SetNumberOfSubdivisions(2)
+subdivider.SetInputConnection(reader.GetOutputPort())
 
-###############################################################################
-# add color based on vertices position
 
-cube_vertices = ut_vtk.get_polydata_vertices(cube_polydata)
-colors = cube_vertices * 255
-ut_vtk.set_polydata_colors(cube_polydata, colors)
+mapper = vtk.vtkPolyDataMapper()
+mapper.SetInputConnection(subdivider.GetOutputPort())
 
-print("new surface colors")
-print(ut_vtk.get_polydata_colors(cube_polydata))
+actor = vtk.vtkActor()
+actor.SetMapper(mapper)
+actor.GetProperty().BackfaceCullingOn()
+# actor.SetScale(0.08, 0.08, 0.08)
 
-###############################################################################
-# Visualize surfaces
 
-# get vtkActor
-cube_actor = ut_vtk.get_actor_from_polydata(cube_polydata)
+
+
+
+# geom_shader_file = open("fury/shaders/line.geom", "r")
+# geom_shader_code = geom_shader_file.read()
+
+# poly_mapper.SetGeometryShaderCode(geom_shader_code)
+
+# @vtk.calldata_type(vtk.VTK_OBJECT)
+# def vtkShaderCallback(caller, event, calldata=None):
+#     program = calldata
+#     if program is not None:
+#         program.SetUniformf("linewidth", linewidth)
+
+# poly_mapper.AddObserver(vtk.vtkCommand.UpdateShaderEvent,
+#                         vtkShaderCallback)
+
+mapper.AddShaderReplacement(
+    vtk.vtkShader.Fragment,
+    '//VTK::Coincident::Impl',
+    True,
+    '''
+    //VTK::Coincident::Impl
+    if (df > 0.35) discard;
+    fragOutput0 = vec4(1, 1, 1, 1);
+    ''',
+    False
+)
+
+# debug block
+# mapper.AddShaderReplacement(
+#     vtk.vtkShader.Fragment,
+#     '//VTK::Coincident::Impl',
+#     True,
+#     '''
+#     //VTK::Coincident::Impl
+#     foo = abs(bar);
+#     ''',
+#     False
+# )
+
+
 
 # renderer and scene
 renderer = window.Renderer()
-renderer.add(cube_actor)
-renderer.set_camera(position=(10, 5, 7), focal_point=(0.5, 0.5, 0.5))
-renderer.zoom(3)
+renderer.add(actor)
+# renderer.set_camera(position=(10, 5, 7), focal_point=(0.5, 0.5, 0.5))
+# renderer.zoom(3)
 
 # display
-# window.show(renderer, size=(600, 600), reset_camera=False)
-window.record(renderer, out_path='cube.png', size=(600, 600))
+window.show(renderer, size=(600, 600), reset_camera=False)
+# window.record(renderer, out_path='cube.png', size=(600, 600))
