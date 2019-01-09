@@ -21,6 +21,7 @@ atext.InterpolateOff()
 # texture coordinates.
 #
 plane = vtk.vtkPlaneSource()
+# plane = vtk.vtkCubeSource()
 
 planeMapper = vtk.vtkPolyDataMapper()
 planeMapper.SetInputConnection(plane.GetOutputPort())
@@ -31,8 +32,8 @@ planeMapper.AddShaderReplacement(
     True,
     '''
     //VTK::Coincident::Impl
-    vec4 mycolor = texture(texture_0, vec2(1000, 10000)); // Read texture color
-    mycolor = vec4(mycolor.r,mycolor.g,mycolor.b,1.0); // Update color based on texture nbr of components 
+    vec4 mycolor = texture(texture_0, vec2(0.1, 0.9)); // Read texture color
+    mycolor = vec4(mycolor.rgb, 1.0); // Update color based on texture nbr of components 
     fragOutput0 = mycolor;
     ''',
     False

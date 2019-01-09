@@ -103,7 +103,7 @@ mapper = ut_vtk.get_polymapper_from_polydata(cube_polydata)
 
 cube_vertices = ut_vtk.get_polydata_vertices(cube_polydata)
 colors = cube_vertices * 255
-ut_vtk.set_polydata_colors(cube_polydata, colors)
+# ut_vtk.set_polydata_colors(cube_polydata, colors)
 
 # print("new surface colors")
 # print(ut_vtk.get_polydata_colors(cube_polydata))
@@ -173,7 +173,8 @@ uchars.InsertNextTuple([0, 255, 0, 1])
 # tex.SetTextureObject(tex_obj)
 
 # attept to load texture from file
-fileName = '1px_green.png'
+# fileName = '1px_green.png'
+fileName = '2x2px.png'
 
 readerFactory = vtk.vtkImageReader2Factory()
 textureFile = readerFactory.CreateImageReader2(fileName)
@@ -183,33 +184,33 @@ textureFile.Update()
 tex = vtk.vtkTexture()
 tex.SetInputConnection(textureFile.GetOutputPort())
 
-# cube_actor.SetTexture(tex)
-cube_actor.GetProperty().SetTexture('mytex', tex)
+cube_actor.SetTexture(tex)
+# cube_actor.GetProperty().SetTexture('mytex', tex)
 
 
 mapper = cube_actor.GetMapper()
 
-mapper.AddShaderReplacement(
-    vtk.vtkShader.Fragment,
-    '//VTK::Coincident::Dec',
-    True,
-    '''
-    //VTK::Coincident::Dec
-    uniform sampler1D mytex
-    ''',
-    False
-)
+# mapper.AddShaderReplacement(
+#     vtk.vtkShader.Fragment,
+#     '//VTK::Coincident::Dec',
+#     True,
+#     '''
+#     //VTK::Coincident::Dec
+#     uniform sampler1D mytex
+#     ''',
+#     False
+# )
 
-mapper.AddShaderReplacement(
-    vtk.vtkShader.Fragment,
-    '//VTK::Coincident::Impl',
-    True,
-    '''
-    //VTK::Coincident::Impl
-    fragOutput0 = texture(mytex, 0);
-    ''',
-    False
-)
+# mapper.AddShaderReplacement(
+#     vtk.vtkShader.Fragment,
+#     '//VTK::Coincident::Impl',
+#     True,
+#     '''
+#     //VTK::Coincident::Impl
+#     fragOutput0 = texture(mytex, 0);
+#     ''',
+#     False
+# )
 
 # debug block
 # mapper.AddShaderReplacement(
