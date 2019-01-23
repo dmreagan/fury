@@ -26,14 +26,65 @@ plane = vtk.vtkPlaneSource()
 planeMapper = vtk.vtkPolyDataMapper()
 planeMapper.SetInputConnection(plane.GetOutputPort())
 
+# planeMapper.AddShaderReplacement(
+#     vtk.vtkShader.Vertex,
+#     '//VTK::Color::Dec',
+#     True,
+#     '''
+#     //VTK::Color::Dec
+#     uniform sampler2D texture_0;
+#     ''',
+#     False
+# )
+
+# planeMapper.AddShaderReplacement(
+#     vtk.vtkShader.Vertex,
+#     '//VTK::ValuePass::Impl',
+#     True,
+#     '''
+#     //VTK::ValuePass::Impl
+
+#     vec4 color = texture(texture_0, tcoordMC);
+
+#     mat4 translateMat = mat4(1.0, 0.0, 0.0, 0.0,
+#                              0.0, 1.0, 0.0, 0.0,
+#                              0.0, 0.0, 1.0, 0.0,
+#                              0.0, 0.0, sin(1000*vertexMC.x), 1.0);
+
+    
+#     vec4 myVertexMC = translateMat * vertexMC;
+
+#     vertexVCVSOutput = MCVCMatrix * myVertexMC;
+#     gl_Position = MCDCMatrix * myVertexMC;
+#     ''',
+#     False
+# )
+
+# planeMapper.AddShaderReplacement(
+#     vtk.vtkShader.Fragment,
+#     '//VTK::Coincident::Impl',
+#     True,
+#     '''
+#     //VTK::Coincident::Impl
+#     vec4 mycolor = texture(texture_0, vec2(0.1, 0.9)); // Read texture color
+#     mycolor = vec4(mycolor.rgb, 1.0); // Update color based on texture nbr of components 
+#     fragOutput0 = mycolor;
+#     ''',
+#     False
+# )
+
 planeMapper.AddShaderReplacement(
     vtk.vtkShader.Fragment,
     '//VTK::Coincident::Impl',
     True,
     '''
     //VTK::Coincident::Impl
-    vec4 mycolor = texture(texture_0, vec2(0.1, 0.9)); // Read texture color
+    vec4 mycolor = texture(texture_0, vec2(0.9, 0.9)); // Read texture color
+
+    // vec4 mycolor = texture(texture_0, tcoordVCVSOutput);
     mycolor = vec4(mycolor.rgb, 1.0); // Update color based on texture nbr of components 
+
+    //vec4 mycolor = vec4(1.0, 0.0, 0.0, 1.0);
     fragOutput0 = mycolor;
     ''',
     False
